@@ -6,9 +6,21 @@ import sys
 import threading
 import time
 
+import glob
+import xml.etree.ElementTree as ET
+
+
 import numpy as np
 from pexpect.exceptions import ExceptionPexpect
 from pexpect.popen_spawn import PopenSpawn
+
+
+def _xml_is_valid(self, xml_path):
+    try:
+        ET.parse(xml_path)
+        return True
+    except Exception:
+        return False
 
 
 class logwriter():
@@ -262,11 +274,15 @@ class WeatherSimulation(threading.Thread):
         os.makedirs(self.output_dir, exist_ok=True)
 
         if not self.redo:
-            files = os.listdir(self.output_dir)
-            results_computed = np.any(["camera0.xml" in f for f in files])
-            if results_computed:
-                self._print("Simulation file exits {}, next!".format(self.output_dir))
+            xmls = sorted(glob.glob(os.path.join(self.output_dir, "*camera0.xml")))
+            if (not self.redo) and xmls and self._xml_is_valid(xmls[0]):
+                self._print("Valid simulation XML exists {}, next!".format(self.output_dir))
                 return
+            elif xmls:
+                self._print("Found corrupted XML, will redo: {}".format(xmls[0]))
+                for p in xmls:
+                    try: os.remove(p)
+                    except: pass
 
         # Save options as json dumps
         try:
@@ -429,8 +445,21 @@ class WeatherSimulation(threading.Thread):
                     self.simtime += 0.5  # Each time a time is displayed the simulation advanced of 0.5 seconds
 
             self._print("Simulation stopped")
-            time.sleep(5.)  # Wait for the "Press any key to continue"
+            time.sleep(5.)
             self.child.sendline(b'\n')
+
+            # Wait for valid XML(s) to appear (flush/write can lag)
+            xmls = []
+            deadline = time.time() + 30
+            while time.time() < deadline:
+                xmls = sorted(glob.glob(os.path.join(self.output_dir, "*camera*.xml")))
+                if xmls and any(self._xml_is_valid(p) for p in xmls):
+                    break
+                time.sleep(0.5)
+
+            if (not xmls) or (not any(self._xml_is_valid(p) for p in xmls)):
+                raise RuntimeError("Simulation finished but XML is missing/corrupted in {}".format(self.output_dir))
+
 
             if _steps_menu:
                 self.child.expect('Steps: What do you want to do \?')
