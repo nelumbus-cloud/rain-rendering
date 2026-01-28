@@ -15,12 +15,6 @@ from pexpect.exceptions import ExceptionPexpect
 from pexpect.popen_spawn import PopenSpawn
 
 
-def _xml_is_valid(self, xml_path):
-    try:
-        ET.parse(xml_path)
-        return True
-    except Exception:
-        return False
 
 
 class logwriter():
@@ -79,6 +73,15 @@ class WeatherSimulation(threading.Thread):
     def _print(self, *argv):
         print("\r #{}  ".format(self.id), end='')
         print.__call__(*argv)
+
+
+    def _xml_is_valid(self, xml_path):
+        try:
+            ET.parse(xml_path)
+            return True
+        except Exception:
+            return False
+
     
     def interact(self, wait_for, send_str):
         # print('wait for: {}'.format(wait_for))
