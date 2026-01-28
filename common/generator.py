@@ -233,11 +233,22 @@ class Generator:
                               "exposure": self.exposure, "camera_gain": self.camera_gain}
 
                 if "nuscenes" in self.dataset:
-                    files = self.images[sequence]
-                    depth_files = self.depth[sequence]
-                    depth_file = depth_files[0]
-                    assert depth_file.endswith(".npy"), "nuscenes processing only works with .npy for depth"
-                    # depth = np.load(depth_file)
+                    files = natsorted(np.array([
+                        os.path.join(self.images[sequence], f)
+                        for f in my_utils.os_listdir(self.images[sequence])
+                        if f.lower().endswith((".jpg", ".png"))
+                    ]))
+
+                    depth_files = natsorted(np.array([
+                        os.path.join(self.depth[sequence], f)
+                        for f in my_utils.os_listdir(self.depth[sequence])
+                        if f.lower().endswith((".npy", ".png"))
+                    ]))
+
+                    assert len(files) > 0, "No image files found"
+                    assert len(depth_files) > 0, "No depth files found"
+                    assert depth_files[0].endswith((".npy", ".png")), "Unexpected depth extension"
+                   # depth = np.load(depth_file)
                     if "gan" in self.dataset:
                         # HARDCODED since these values are not known in nuscenes_gan
                         imW, imH = (1600, 900)

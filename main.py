@@ -27,7 +27,8 @@ def check_arg(args):
 
     # only for nuscenes (temporarily deactivated)
     # only for nuscenes and nuscenes_gan
-    # parser.add_argument('--json_file', help='token files in json for nuscenes', required=False)
+    parser.add_argument('--json_file', help='token files in json for nuscenes', required=False)
+    parser.add_argument('--dataset_version', help='versio of dataset e.g v1.0-mini', required=False)
     #
     # parser.add_argument('-g', '--gan_root',
     #                     help='Path to modified gan database root',
@@ -191,9 +192,12 @@ def check_arg(args):
 
     sims_to_run = []
     results.particles = {}
+
     for seq in results.sequences:
         results.particles[seq] = db.sim(results.dataset, seq, particles_root)
 
+        if hasattr(results, "particles_opts") and seq in results.particles_opts:
+            results.particles[seq]["options"] = results.particles_opts[seq]
         # Check if there is a need to run simulation
         weathers_to_run = [w for w in results.weather if len(glob2.glob(my_utils.particles_path(results.particles[seq]["path"], w))) == 0 or results.force_particles]
         if len(weathers_to_run) != 0:
