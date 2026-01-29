@@ -113,7 +113,13 @@ def sim(db_s, seq, particles_root):
     # Find ad-hoc settings
     settings_seq = [s for s in db_settings["sequences"] if re.match(s.replace("\\", "\\\\"), seq) is not None]
     if len(settings_seq) > 0:
-        sim["path"] = os.path.join(particles_root, settings_seq[0].replace("*", "x"))
+        # If the setting is a generic wildcard, we do NOT want to group all sequences into the same folder ('.x')
+        # We want to keep the sequence specific path.
+        if settings_seq[0] == ".*":
+             sim["path"] = os.path.join(particles_root, seq)
+        else:
+             sim["path"] = os.path.join(particles_root, settings_seq[0].replace("*", "x"))
+        
         sim["options"] = {**sim["options"], **db_settings["sequences"][settings_seq[0]]}
         del sim["options"]["sequences"]  # No need to keep
     else:
