@@ -235,7 +235,7 @@ class WeatherSimulation(threading.Thread):
 
     def apply_options(self):
         # Series of hacks to avoid warning due to incompatible parameters
-        self.set_sim_Camera0_CcdSpecs(99999, 99999, 1.0)
+       # self.set_sim_Camera0_CcdSpecs(99999, 99999, 1.0)
 
         # Apply settings
         self.set_sim_Duration(stats_start_time * 1000 + self.options["sim_duration"] * 1000)
