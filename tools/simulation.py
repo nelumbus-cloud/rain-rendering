@@ -455,12 +455,26 @@ class WeatherSimulation(threading.Thread):
             xmls = []
             deadline = time.time() + 30
             while time.time() < deadline:
-                xmls = sorted(glob.glob(os.path.join(self.output_dir, "*camera*.xml")))
-                if xmls and any(self._xml_is_valid(p) for p in xmls):
+                xmls = sorted(glob.glob(os.path.join(self.output_dir, "*camera0.xml")))
+                valid_xmls = []
+                for p in xmls:
+                     if self._xml_is_valid(p):
+                         valid_xmls.append(p)
+                
+                if valid_xmls:
+                    for p in valid_xmls:
+                         self._print("Verified valid XML: {}".format(p))
+                         try:
+                             with open(p, 'r') as f:
+                                 content_snippet = f.read(100)
+                                 self._print("File start content: ->{}<-".format(content_snippet))
+                         except Exception as e:
+                             self._print("Could not read file content: {}".format(e))
+                    xmls = valid_xmls
                     break
                 time.sleep(0.5)
 
-            if (not xmls) or (not any(self._xml_is_valid(p) for p in xmls)):
+            if not xmls:
                 raise RuntimeError("Simulation finished but XML is missing/corrupted in {}".format(self.output_dir))
 
 
