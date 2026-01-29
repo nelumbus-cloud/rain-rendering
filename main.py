@@ -199,7 +199,19 @@ def check_arg(args):
         if hasattr(results, "particles_opts") and seq in results.particles_opts:
             results.particles[seq]["options"] = results.particles_opts[seq]
         # Check if there is a need to run simulation
-        weathers_to_run = [w for w in results.weather if len(glob2.glob(my_utils.particles_path(results.particles[seq]["path"], w))) == 0 or results.force_particles]
+        weathers_to_run = []
+        for w in results.weather:
+             existing_files = glob2.glob(my_utils.particles_path(results.particles[seq]["path"], w))
+             # Check if files exist AND are not empty (validity check)
+             is_valid = False
+             if len(existing_files) > 0:
+                 try:
+                     if os.path.getsize(existing_files[0]) > 0:
+                         is_valid = True
+                 except: pass
+             
+             if not is_valid or results.force_particles:
+                 weathers_to_run.append(w)
         if len(weathers_to_run) != 0:
             sims_to_run.append({"path": [results.particles[seq]["path"]], "options": [results.particles[seq]["options"]], "weather": weathers_to_run})
 
