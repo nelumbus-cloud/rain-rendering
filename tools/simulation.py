@@ -451,17 +451,17 @@ class WeatherSimulation(threading.Thread):
             time.sleep(5.)
             self.child.sendline(b'\n')
 
-            # # Wait for valid XML(s) to appear (flush/write can lag)
-            # xmls = []
-            # deadline = time.time() + 30
-            # while time.time() < deadline:
-            #     xmls = sorted(glob.glob(os.path.join(self.output_dir, "*camera*.xml")))
-            #     if xmls and any(self._xml_is_valid(p) for p in xmls):
-            #         break
-            #     time.sleep(0.5)
+            # Wait for valid XML(s) to appear (flush/write can lag)
+            xmls = []
+            deadline = time.time() + 30
+            while time.time() < deadline:
+                xmls = sorted(glob.glob(os.path.join(self.output_dir, "*camera*.xml")))
+                if xmls and any(self._xml_is_valid(p) for p in xmls):
+                    break
+                time.sleep(0.5)
 
-            # if (not xmls) or (not any(self._xml_is_valid(p) for p in xmls)):
-            #     raise RuntimeError("Simulation finished but XML is missing/corrupted in {}".format(self.output_dir))
+            if (not xmls) or (not any(self._xml_is_valid(p) for p in xmls)):
+                raise RuntimeError("Simulation finished but XML is missing/corrupted in {}".format(self.output_dir))
 
 
             if _steps_menu:
