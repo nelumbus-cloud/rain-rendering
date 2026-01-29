@@ -38,7 +38,7 @@ assert platform.architecture()[0] == '64bit', "Only 64 bits OS are supported for
 bin_platform = sys.platform[:3]
 bin_bitness = 'x64'
 
-stats_start_time = 5.0  # Stats starting time (s)
+stats_start_time = 1.0  # Stats starting time (s)
 
 class WeatherSimulation(threading.Thread):
     def __init__(self, id, path, options, weather, redo=False, deactivate_window_mode=True,
@@ -336,9 +336,10 @@ class WeatherSimulation(threading.Thread):
                         seq_code = '100'
                     self._print('		System code: ', seq_code)
                     self.child.sendline(seq_code.encode('ascii'))
+                    
                 else:
                     raise NotImplementedError("No settings for this set {}".format(self.preset[0]))
-
+            self.apply_options()
             # Deactivate windows AND save light map option
             if self.deactivate_window_mode:
                 self._print("In main menu")
