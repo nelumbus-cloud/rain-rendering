@@ -129,5 +129,8 @@ def settings():
 
     # Sequence-wise overrides (none for nuScenes in this shim)
     settings["sequences"] = {}
+    settings["sequences"][".*"] = {
+        "preset": ["nuscenes", "CAM_FRONT", ["CAM_FRONT"], ["static"], [40.0]]
+    }
 
     return settings
