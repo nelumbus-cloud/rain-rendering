@@ -500,10 +500,7 @@ class WeatherSimulation(threading.Thread):
             self._print("If starting python from an IDE, check LD_LIBRARY_PATH environment is accessible (https://youtrack.jetbrains.com/issue/PY-29580)")
             self.child.kill(signal.SIGINT)
             exit()
-        except Exception as e:
-            # Might happens at the end of the simulation, if the process closes slightly before last key strike
-            self._print(e)
-            pass
+
 
         # Kill process in case it's not dead (cruel world)
         try:
